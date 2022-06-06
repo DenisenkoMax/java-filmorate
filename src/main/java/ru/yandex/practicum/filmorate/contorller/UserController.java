@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.contorller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,10 +10,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final Map<Integer, User> users = new HashMap<>();
     private Integer id = 1;
 
@@ -25,7 +24,7 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody User user) {
-        userValidation(user);
+        validationOfUser(user);
         if (!users.containsKey(user.getId())) {
             log.debug("Создание Пользователя {}", user.getName());
             user.setId(id);
@@ -37,7 +36,7 @@ public class UserController {
 
     @PutMapping
     public User put(@RequestBody User user) {
-        userValidation(user);
+        validationOfUser(user);
         log.debug("Обновление Пользователя {}", user.getName());
         if (!this.users.containsKey(user.getId())) {
             log.debug("Неверный id");
@@ -47,7 +46,7 @@ public class UserController {
         return user;
     }
 
-    private void userValidation(User user) {
+    private void validationOfUser(User user) {
         if (user == null) {
             log.debug("Отправлен пустой запрос user");
             throw new ValidationException("Отправлен пустой запрос user");
@@ -65,7 +64,7 @@ public class UserController {
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
         if (user.getName() == null || user.getName().isBlank()) {
-            log.debug("Имя для отображения может быть пустым — использован логин: {}", user.getLogin());
+            log.debug("Имя для отображения может быть пустым. Использован логин: {}", user.getLogin());
             user.setName(user.getLogin());
         }
     }
