@@ -24,7 +24,7 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody User user) {
-        validationOfUser(user);
+        validateUser(user);
         if (!users.containsKey(user.getId())) {
             log.debug("Создание Пользователя {}", user.getName());
             user.setId(id);
@@ -36,7 +36,7 @@ public class UserController {
 
     @PutMapping
     public User put(@RequestBody User user) {
-        validationOfUser(user);
+        validateUser(user);
         log.debug("Обновление Пользователя {}", user.getName());
         if (!this.users.containsKey(user.getId())) {
             log.debug("Неверный id");
@@ -46,7 +46,7 @@ public class UserController {
         return user;
     }
 
-    private void validationOfUser(User user) {
+    private void validateUser(User user) {
         if (user == null) {
             log.debug("Отправлен пустой запрос user");
             throw new ValidationException("Отправлен пустой запрос user");

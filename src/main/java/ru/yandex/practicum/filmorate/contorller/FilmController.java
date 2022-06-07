@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    public static final LocalDate VALIDATION_DATE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate VALIDATION_DATE = LocalDate.of(1895, 12, 28);
     private final Map<Integer, Film> films = new HashMap<>();
     private Integer id = 1;
 
@@ -25,7 +25,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@RequestBody Film film) {
-        validationOfFilm(film);
+        validateFilm(film);
         if (!films.containsKey(film.getId())) {
             log.debug("Создание Фильма {}", film.getName());
             film.setId(id);
@@ -37,7 +37,7 @@ public class FilmController {
 
     @PutMapping
     public Film put(@RequestBody Film film) {
-        validationOfFilm(film);
+        validateFilm(film);
         log.debug("Обновление фильма {}", film.getName());
         if (!this.films.containsKey(film.getId())) {
             log.debug("Неверный id");
@@ -47,7 +47,7 @@ public class FilmController {
         return film;
     }
 
-    private void validationOfFilm(Film film) {
+    private void validateFilm(Film film) {
         if (film == null) {
             log.debug("Отправлен пустой запрос film");
             throw new ValidationException("Отправлен пустой запрос film");
