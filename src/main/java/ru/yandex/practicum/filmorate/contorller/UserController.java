@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.contorller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,57 +15,54 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
     private Integer id = 1;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> findAll() {
-        return users.values();
+        return userService.findAll();
     }
 
     @PostMapping
     public User create(@RequestBody User user) {
-        validateUser(user);
-        if (!users.containsKey(user.getId())) {
-            log.debug("Создание Пользователя {}", user.getName());
-            user.setId(id);
-            users.put(id, user);
-            id++;
-        }
+        userService.create(user);
         return user;
     }
 
     @PutMapping
     public User put(@RequestBody User user) {
-        validateUser(user);
-        log.debug("Обновление Пользователя {}", user.getName());
-        if (!this.users.containsKey(user.getId())) {
-            log.debug("Неверный id");
-            throw new ValidationException("Отправлен пустой запрос user");
-        }
-        users.put(user.getId(), user);
+        userService.put(user);
         return user;
     }
 
-    private void validateUser(User user) {
-        if (user == null) {
-            log.debug("Отправлен пустой запрос user");
-            throw new ValidationException("Отправлен пустой запрос user");
-        }
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.debug("Электронная почта не может быть пустой и должна содержать символ: {}", user.getEmail());
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if ((user.getLogin() == null || user.getLogin().isBlank()) || user.getLogin().contains(" ")) {
-            log.debug("Логин не может быть пустым и содержать пробелы: {}", user.getLogin());
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-        }
-        if (LocalDate.now().isBefore(user.getBirthday())) {
-            log.debug("Дата рождения не может быть в будущем: {}", user.getBirthday().toString());
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.debug("Имя для отображения может быть пустым. Использован логин: {}", user.getLogin());
-            user.setName(user.getLogin());
-        }
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriend(id, friendId);
     }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.getUser(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> findFriends(@PathVariable Long id) {
+        return userService.findFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> findMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.findMutualFriends(id, otherId);
+    }
+
 }
