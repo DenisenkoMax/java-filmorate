@@ -17,6 +17,12 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
     private static final LocalDate VALIDATION_DATE = LocalDate.of(1895, 12, 28);
+    private static final Comparator<Film> FILM_COMPARATOR = (o1, o2) -> {
+        if (o1.getLikes().size() == o2.getLikes().size())
+            return 0;
+        else if (o1.getLikes().size() < o2.getLikes().size()) return 1;
+        else return -1;
+    };
     private final FilmStorage filmStorage;
 
 
@@ -65,15 +71,7 @@ public class FilmService {
     }
 
     public Collection<Film> findTopFilms(Integer size) {
-        return filmStorage.getFilms().values().stream().sorted(new Comparator<Film>() {
-            @Override
-            public int compare(Film o1, Film o2) {
-                if (o1.getLikes().size() == o2.getLikes().size())
-                    return 0;
-                else if (o1.getLikes().size() < o2.getLikes().size()) return 1;
-                else return -1;
-            }
-        }).limit(size).collect(Collectors.toList());
+        return filmStorage.getFilms().values().stream().sorted(FILM_COMPARATOR).limit(size).collect(Collectors.toList());
     }
 
     private void validateFilm(Film film) {
