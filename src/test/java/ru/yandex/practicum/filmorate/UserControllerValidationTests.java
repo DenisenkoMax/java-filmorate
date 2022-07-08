@@ -2,10 +2,14 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.contorller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 
@@ -14,14 +18,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class UserControllerValidationTests {
-    private static final UserController userController = new UserController();
+
+    private static UserController userController;
+
+    @Autowired
+    public UserControllerValidationTests(UserService userService) {
+        userController = new UserController(userService);
+    }
 
     private User user;
 
     @BeforeEach
     private void addModels() {
         this.user = User.builder()
-                .id(1)
+                .id(1L)
                 .email("dsd@yandex.ru")
                 .login("Vasya")
                 .name("Vasilii")
